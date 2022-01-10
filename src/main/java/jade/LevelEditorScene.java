@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
+import util.Time;
 
 import java.awt.event.KeyEvent;
 import java.nio.FloatBuffer;
@@ -120,6 +121,7 @@ public class LevelEditorScene extends Scene{
     public void update(float dt) {
         //MOVE THE CAMERA
         camera.position.x -= dt*50.0f;
+        camera.position.y -= dt*20.0f;
 //        System.out.println("We are running at " + (1.0f/dt) + " FPS");
         //Bind shader program
         defaultShader.use();
@@ -127,6 +129,9 @@ public class LevelEditorScene extends Scene{
         //BEFORE BINDING THE OBJECTS WE SET UP THE OBJECT IN THE WORLD AND PROJECT TO THE VIEW COORDS
         defaultShader.uploadMat4f("uProj",camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView",camera.getViewMatrix());
+
+        defaultShader.uploadFloat("uTime", Time.getTime());
+
         //BIND the VAO
         glBindVertexArray(vaoID);
 

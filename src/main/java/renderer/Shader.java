@@ -1,6 +1,6 @@
 package renderer;
 
-import org.joml.Matrix4f;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 
 import java.io.IOException;
@@ -16,6 +16,8 @@ import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 public class Shader {
 
     private int shaderProgramID;
+    private boolean beingUsed = false;
+
     private String vertexSource;
     private String fragmentSource;
     private String filePath; //source file *.glsl
@@ -110,17 +112,73 @@ public class Shader {
     }
 
     public void use() {
-        glUseProgram(shaderProgramID);
+        if(!beingUsed){
+            glUseProgram(shaderProgramID);
+            beingUsed = true;
+        }
+
+
     }
 
     public void detach(){
         glUseProgram(0);
+        beingUsed = false;
     }
 
     public void uploadMat4f(String varName, Matrix4f mat4){
-        int varLocation = glGetUniformLocation(shaderProgramID,varName);
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use(); //altrimenti l'upload non va da nessuna parte
         FloatBuffer matBuffer = BufferUtils.createFloatBuffer(16); //4x4 matrix
-        mat4.get(matBuffer);
+        mat4.get(matBuffer); //[1,1,1,1,1,1,1,1,1,....] 16 linear buffer
+        //BE SURE Shader.use() is called BEFORE upload
         glUniformMatrix4fv(varLocation,false,matBuffer);
+    }
+
+    public void uploadMat3f(String varName, Matrix3f mat3){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use(); //altrimenti l'upload non va da nessuna parte
+        FloatBuffer matBuffer = BufferUtils.createFloatBuffer(9); //3x3 matrix
+        mat3.get(matBuffer); //[1,1,1,1,1,1,1,1,1,....] 9 linear buffer
+        //BE SURE Shader.use() is called BEFORE upload
+        glUniformMatrix3fv(varLocation,false,matBuffer);
+    }
+
+    public void uploadMat2f(String varName, Matrix2f mat2){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use(); //altrimenti l'upload non va da nessuna parte
+        FloatBuffer matBuffer = BufferUtils.createFloatBuffer(4); //2x2 matrix
+        mat2.get(matBuffer); //[1,1,1,1] 4 linear buffer
+        //BE SURE Shader.use() is called BEFORE upload
+        glUniformMatrix2fv(varLocation,false,matBuffer);
+    }
+
+    public void uploadVec4f(String varName, Vector4f vec){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform4f(varLocation,vec.x,vec.y,vec.z,vec.w); //upload 4 floats
+    }
+
+    public void uploadVec3f(String varName, Vector3f vec){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform3f(varLocation,vec.x,vec.y,vec.z); //upload 3 floats
+    }
+
+    public void uploadVec2f(String varName, Vector2f vec){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform2f(varLocation,vec.x,vec.y); //upload 2 floats
+    }
+
+    public void uploadFloat(String varName, float val){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform1f(varLocation,val);
+    }
+
+    public void uploadInt(String varName, int val){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform1i(varLocation,val);
     }
 }
