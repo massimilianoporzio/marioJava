@@ -144,11 +144,11 @@ public class Window {
 
             //PRINT AXIS VALUE
             float xAxisValue = GamePadListener.getAxisValue(GLFW_GAMEPAD_AXIS_LEFT_X);
-            if(xAxisValue!=noXAxesMoved) {
+            if(!Float.isNaN(xAxisValue) && xAxisValue!=noXAxesMoved) {
                 System.out.println("x Axis value is: " + xAxisValue);
             }
             float yAxisValue = GamePadListener.getAxisValue(GLFW_GAMEPAD_AXIS_LEFT_Y);
-            if(yAxisValue!=noYAxesMoved) {
+            if(!Float.isNaN(yAxisValue) && yAxisValue!=noYAxesMoved ) {
                 System.out.println("y Axis value is: " + yAxisValue);
             }
             //swap automatically our buffers
