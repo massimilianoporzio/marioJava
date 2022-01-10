@@ -1,5 +1,7 @@
 package jade;
 
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
 
@@ -37,11 +39,12 @@ public class LevelEditorScene extends Scene{
     private int vertexID, fragmentID, shaderProgram;
     private float[] vertexArray = {
             // position               // color
-            0.5f, -0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
-            -0.5f,  0.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
-            0.5f,  0.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
-            -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
+            100.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
+            0.5f,  100.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
+            100.5f,  100.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
+            0.5f, 0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
     };
+
 
     // IMPORTANT: Must be in counter-clockwise order
     private int[] elementArray = {
@@ -63,7 +66,9 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void init() {
+        this.camera = new Camera(new Vector2f()); //camera at 0,0
         defaultShader = new Shader("assets/shaders/default.glsl");
+
         //COMPILE AND LINK SHADERS
         defaultShader.compileAndLink();
 
@@ -113,9 +118,15 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
+        //MOVE THE CAMERA
+        camera.position.x -= dt*50.0f;
 //        System.out.println("We are running at " + (1.0f/dt) + " FPS");
         //Bind shader program
         defaultShader.use();
+
+        //BEFORE BINDING THE OBJECTS WE SET UP THE OBJECT IN THE WORLD AND PROJECT TO THE VIEW COORDS
+        defaultShader.uploadMat4f("uProj",camera.getProjectionMatrix());
+        defaultShader.uploadMat4f("uView",camera.getViewMatrix());
         //BIND the VAO
         glBindVertexArray(vaoID);
 

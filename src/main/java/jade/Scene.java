@@ -2,6 +2,7 @@ package jade;
 
 public abstract class Scene {
     //MAY CONTAIN PHYSICS, GAME STUFF , RENDERER,...
+    protected Camera camera;
     public Scene() {
     }
 
