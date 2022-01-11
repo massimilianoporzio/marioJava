@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
+import renderer.Texture;
 import util.Time;
 
 import java.awt.event.KeyEvent;
@@ -39,11 +40,11 @@ public class LevelEditorScene extends Scene{
             "    }";
     private int vertexID, fragmentID, shaderProgram;
     private float[] vertexArray = {
-            // position               // color
-            100.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
-            0.5f,  100.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
-            100.5f,  100.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
-            0.5f, 0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
+            // position               // color                 //UV Coordinates (where to apply the textures)
+            100.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f,   1,0,                    // Bottom right 0
+            0.5f,  100.5f, 0.0f,      0.0f, 1.0f, 0.0f, 1.0f,   0,1,                    // Top left     1
+            100.5f,  100.5f, 0.0f ,   1.0f, 0.0f, 1.0f, 1.0f,   1,1,                    // Top right    2
+            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 0.0f, 1.0f,   0,0                     // Bottom left  3
     };
 
 
@@ -60,6 +61,8 @@ public class LevelEditorScene extends Scene{
     private int vaoID, vboID, eboID;
     private Shader defaultShader;
 
+    private Texture testTexture;
+
     public LevelEditorScene() {
 //        System.out.println("Inside level editor scene");
 
@@ -72,6 +75,9 @@ public class LevelEditorScene extends Scene{
 
         //COMPILE AND LINK SHADERS
         defaultShader.compileAndLink();
+
+        //CREATE THE TEXTURE ON GPU
+        testTexture = new Texture("assets/images/testImage.png");
 
         //FIrst load and compile vertex shader
         vertexID = glCreateShader(GL_VERTEX_SHADER);
@@ -102,15 +108,17 @@ public class LevelEditorScene extends Scene{
         //ADD VERTEX ATTRIBUTES POINTERS - spcify we'll use three coords and 4 numbers for color and the stride is 7
         int positionsSize = 3; //x,y,z
         int colorsSize = 4;
-        int floatSizeBytes = 4; //4 bytes for a float we need to specify it!
-        int vertexSizeBytes = (positionsSize+colorsSize)*floatSizeBytes; //TOTAL BYTES OF A VERTEX
+        int uvSize = 2;
+        int vertexSizeBytes = (positionsSize+colorsSize+uvSize)*Float.BYTES; //TOTAL BYTES OF A VERTEX
 
         glVertexAttribPointer(0,positionsSize,GL_FLOAT,false, vertexSizeBytes,0); //pointer is the offset
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1,colorsSize,GL_FLOAT,false,vertexSizeBytes,positionsSize*floatSizeBytes);//three bytes after the x
+        glVertexAttribPointer(1,colorsSize,GL_FLOAT,false,vertexSizeBytes,positionsSize*Float.BYTES);//three bytes after the x
         glEnableVertexAttribArray(1);
 
+        glVertexAttribPointer(2, uvSize, GL_FLOAT, false,vertexSizeBytes,(positionsSize+colorsSize)*Float.BYTES);
+        glEnableVertexAttribArray(2);
 
 
     }
@@ -120,11 +128,16 @@ public class LevelEditorScene extends Scene{
     @Override
     public void update(float dt) {
         //MOVE THE CAMERA
-        camera.position.x -= dt*50.0f;
-        camera.position.y -= dt*20.0f;
+//        camera.position.x -= dt*50.0f;
+//        camera.position.y -= dt*20.0f;
 //        System.out.println("We are running at " + (1.0f/dt) + " FPS");
         //Bind shader program
         defaultShader.use();
+
+        //UPLOAD the texture
+        defaultShader.uploadTexture("TEX_SAMPLER",0); //USE THE SLOT 0
+        glActiveTexture(GL_TEXTURE0); //ACTIVATE THE SLOT 0
+        testTexture.bind();
 
         //BEFORE BINDING THE OBJECTS WE SET UP THE OBJECT IN THE WORLD AND PROJECT TO THE VIEW COORDS
         defaultShader.uploadMat4f("uProj",camera.getProjectionMatrix());
