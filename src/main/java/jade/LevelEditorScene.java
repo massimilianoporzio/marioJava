@@ -1,5 +1,6 @@
 package jade;
 
+import components.SpriteRenderer;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
@@ -18,33 +19,33 @@ import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
 import static org.lwjgl.opengl.GL20.*;
 
 public class LevelEditorScene extends Scene{
-    private String vertexShaderSrc ="#version 330 core\n" +
-            "    layout (location=0) in vec3 aPos; //attribute position\n" +
-            "    layout (location=1) in vec4 aColor; //attribute color\n" +
-            "\n" +
-            "    out vec4 fColor; //output color for the fragment shader\n" +
-            "\n" +
-            "    void main()\n" +
-            "    {\n" +
-            "        fColor = aColor;\n" +
-            "        gl_Position = vec4(aPos, 1.0); //4 vector wity my 3 coord aPos and 1.0\n" +
-            "    }";
-    private String fragmentShaderSrc = "#version 330 core\n" +
-            "\n" +
-            "    in vec4 fColor; //accept the output of vertex shader as input\n" +
-            "    out vec4 color; //color we output\n" +
-            "\n" +
-            "    void main()\n" +
-            "    {\n" +
-            "        color = fColor; //just pass position and color (here color for the fragment shader)\n" +
-            "    }";
+//    private String vertexShaderSrc ="#version 330 core\n" +
+//            "    layout (location=0) in vec3 aPos; //attribute position\n" +
+//            "    layout (location=1) in vec4 aColor; //attribute color\n" +
+//            "\n" +
+//            "    out vec4 fColor; //output color for the fragment shader\n" +
+//            "\n" +
+//            "    void main()\n" +
+//            "    {\n" +
+//            "        fColor = aColor;\n" +
+//            "        gl_Position = vec4(aPos, 1.0); //4 vector wity my 3 coord aPos and 1.0\n" +
+//            "    }";
+//    private String fragmentShaderSrc = "#version 330 core\n" +
+//            "\n" +
+//            "    in vec4 fColor; //accept the output of vertex shader as input\n" +
+//            "    out vec4 color; //color we output\n" +
+//            "\n" +
+//            "    void main()\n" +
+//            "    {\n" +
+//            "        color = fColor; //just pass position and color (here color for the fragment shader)\n" +
+//            "    }";
     private int vertexID, fragmentID, shaderProgram;
     private float[] vertexArray = {
-            // position               // color                 //UV Coordinates (where to apply the textures)
-            100.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f,   1,0,                    // Bottom right 0
-            0.5f,  100.5f, 0.0f,      0.0f, 1.0f, 0.0f, 1.0f,   0,1,                    // Top left     1
-            100.5f,  100.5f, 0.0f ,   1.0f, 0.0f, 1.0f, 1.0f,   1,1,                    // Top right    2
-            0.5f, 0.5f, 0.0f,         1.0f, 1.0f, 0.0f, 1.0f,   0,0                     // Bottom left  3
+            // position               // color                  // UV Coordinates
+            100f,   0f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f,     1, 1, // Bottom right 0
+            0f, 100f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f,     0, 0, // Top left     1
+            100f, 100f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f,     1, 0, // Top right    2
+            0f,   0f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f,     0, 1  // Bottom left  3
     };
 
 
@@ -59,9 +60,13 @@ public class LevelEditorScene extends Scene{
     };
 
     private int vaoID, vboID, eboID;
+    private boolean firstTime = true;
+
     private Shader defaultShader;
 
     private Texture testTexture;
+
+    GameObject testObj;
 
     public LevelEditorScene() {
 //        System.out.println("Inside level editor scene");
@@ -70,6 +75,12 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void init() {
+        System.out.println("Creating test object");
+        //CREATE THE TEST GAME OBJECT
+        this.testObj = new GameObject("test object");
+        this.testObj.addComponent(new SpriteRenderer());
+        this.addGameObjectToScene(this.testObj);
+
         this.camera = new Camera(new Vector2f()); //camera at 0,0
         defaultShader = new Shader("assets/shaders/default.glsl");
 
@@ -79,11 +90,6 @@ public class LevelEditorScene extends Scene{
         //CREATE THE TEXTURE ON GPU
         testTexture = new Texture("assets/images/testImage.png");
 
-        //FIrst load and compile vertex shader
-        vertexID = glCreateShader(GL_VERTEX_SHADER);
-        //Pass the shader src code to the GPU
-        glShaderSource(vertexID,vertexShaderSrc);
-        glCompileShader(vertexID);
 
         //GENERATE VAO, VBO, EBObuffer objects and send to GPU
         vaoID =  glGenVertexArrays();
@@ -160,5 +166,18 @@ public class LevelEditorScene extends Scene{
         glDisableVertexAttribArray(1);
         glBindVertexArray(0); //bind to "0" = no bind
         defaultShader.detach(); // don't use PrgramSahder anymore
+
+        if(firstTime){
+            System.out.println("Creating gameObject!");
+            GameObject go = new GameObject("test object 2");
+            go.addComponent(new SpriteRenderer());
+            this.addGameObjectToScene(go);
+            firstTime = false;
+        }
+
+
+        for (GameObject go : this.gameObjects) {
+            go.uodate(dt); //AD OGNI FRAME GIRO I GAME OBJ E LI FACCIO AGGIORNARE ALLO STEP DT
+        }
     }
 }
