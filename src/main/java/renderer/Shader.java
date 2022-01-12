@@ -186,4 +186,10 @@ public class Shader {
         use();
         glUniform1i(varLocation,slot); //ITS LIKE TO UPLOAD AN INTEGER
     }
+
+    public void uploadIntArray(String varName, int[]array){
+        int varLocation = glGetUniformLocation(shaderProgramID,varName); //GET THE LOCATION of the shader IN THE GPU
+        use();
+        glUniform1iv(varLocation,array);
+    }
 }
