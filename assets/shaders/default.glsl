@@ -11,7 +11,7 @@
 
     layout (location=0) in vec3 aPos; //attribute position as input (in)
     layout (location=1) in vec4 aColor; //attribute color
-    layout (location=2) in vec2 aTexCoords; //attribute uv (Texture coord)
+//    layout (location=2) in vec2 aTexCoords; //attribute uv (Texture coord)
 
     //UNIFORM: ATTRIBUTI CHE SI APPLICANO A TUTTI I VAO NON SONO SPECIFICI DI CIASUNO
     uniform mat4 uProj; //projection matrix
@@ -19,24 +19,24 @@
 
 
     out vec4 fColor; //output color for the fragment shader as output (out)
-    out vec2 fTexCoords; //coords of the textires passed to the fragment shader
+//    out vec2 fTexCoords; //coords of the textires passed to the fragment shader
 
 
     void main()
     {
         fColor = aColor;
-        fTexCoords = aTexCoords;
+//        fTexCoords = aTexCoords;
         gl_Position = uProj * uView * vec4(aPos, 1.0); //4 vector wity my 3 coord aPos and 1.0
     }
     //the position is passed to the fragment and it uses it interpolating between vertex
     #type fragment
     #version 330 core
 
-    uniform float uTime;
-    uniform sampler2D TEX_SAMPLER; //SAMPLE THE IMAGE
+//    uniform float uTime;
+//    uniform sampler2D TEX_SAMPLER; //SAMPLE THE IMAGE
 
     in vec4 fColor; //accept the output of vertex shader as input
-    in vec2 fTexCoords; //accept the coords of the texture
+//    in vec2 fTexCoords; //accept the coords of the texture
     out vec4 color; //color we output
 
     float rand2D(in vec2 co){
@@ -98,7 +98,7 @@
         //COMPUTING NOISE
 //        float noise = fract(sin(dot(fColor.zy, vec2(12.9898,78.233)))*43758.5453);
 //        color = fColor * noise;
-//        color = fColor;
-        color = texture(TEX_SAMPLER, fTexCoords);
+        color = fColor;
+//        color = texture(TEX_SAMPLER, fTexCoords);
 
     }

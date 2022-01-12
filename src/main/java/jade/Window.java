@@ -51,9 +51,9 @@ public class Window {
         this.width = 1366;
         this.height = 768;
         this.title = "Mario";
-        this.r = 1;
-        this.b = 1;
-        this.g = 1 ;
+        this.r = 0;
+        this.b = 0;
+        this.g = 0 ; //BLACK BACKGROUND
         this.a = 1;
 
     }
@@ -63,6 +63,10 @@ public class Window {
             Window.window = new Window();
         }
         return Window.window; // return the singleton
+    }
+
+    public static Scene getScene(){
+        return get().currentScene;
     }
 
     public void run() {

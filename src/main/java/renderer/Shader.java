@@ -49,8 +49,7 @@ public class Shader {
                 }else{
                     throw new IOException("Unexpected token '"+ secondtPattern+"'");
                 }
-                System.out.println(vertexSource);
-                System.out.println(fragmentSource);
+
 
 
         }catch (IOException ex){
@@ -77,7 +76,7 @@ public class Shader {
             assert false : ""; //exit program
         }
         else{
-            System.out.println("VERTEX OK");
+//            System.out.println("VERTEX OK");
         }
 
         fragmentID = glCreateShader(GL_FRAGMENT_SHADER);

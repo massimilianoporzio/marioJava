@@ -1,72 +1,14 @@
 package jade;
 
+
 import components.SpriteRenderer;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
-import renderer.Shader;
-import renderer.Texture;
-import util.Time;
+import org.joml.Vector4f;
 
-import java.awt.event.KeyEvent;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
-import static org.lwjgl.glfw.GLFW.GLFW_GAMEPAD_BUTTON_A;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.opengl.ARBVertexArrayObject.glBindVertexArray;
-import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 
 public class LevelEditorScene extends Scene{
-//    private String vertexShaderSrc ="#version 330 core\n" +
-//            "    layout (location=0) in vec3 aPos; //attribute position\n" +
-//            "    layout (location=1) in vec4 aColor; //attribute color\n" +
-//            "\n" +
-//            "    out vec4 fColor; //output color for the fragment shader\n" +
-//            "\n" +
-//            "    void main()\n" +
-//            "    {\n" +
-//            "        fColor = aColor;\n" +
-//            "        gl_Position = vec4(aPos, 1.0); //4 vector wity my 3 coord aPos and 1.0\n" +
-//            "    }";
-//    private String fragmentShaderSrc = "#version 330 core\n" +
-//            "\n" +
-//            "    in vec4 fColor; //accept the output of vertex shader as input\n" +
-//            "    out vec4 color; //color we output\n" +
-//            "\n" +
-//            "    void main()\n" +
-//            "    {\n" +
-//            "        color = fColor; //just pass position and color (here color for the fragment shader)\n" +
-//            "    }";
-    private int vertexID, fragmentID, shaderProgram;
-    private float[] vertexArray = {
-            // position               // color                  // UV Coordinates
-            100f,   0f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f,     1, 1, // Bottom right 0
-            0f, 100f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f,     0, 0, // Top left     1
-            100f, 100f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f,     1, 0, // Top right    2
-            0f,   0f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f,     0, 1  // Bottom left  3
-    };
-
-
-    // IMPORTANT: Must be in counter-clockwise order
-    private int[] elementArray = {
-            /*
-                    x        x
-                    x        x
-             */
-            2, 1, 0, // Top right triangle
-            0, 1, 3 // bottom left triangle
-    };
-
-    private int vaoID, vboID, eboID;
-    private boolean firstTime = true;
-
-    private Shader defaultShader;
-
-    private Texture testTexture;
-
-    GameObject testObj;
 
     public LevelEditorScene() {
 //        System.out.println("Inside level editor scene");
@@ -75,57 +17,27 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void init() {
-        System.out.println("Creating test object");
-        //CREATE THE TEST GAME OBJECT
-        this.testObj = new GameObject("test object");
-        this.testObj.addComponent(new SpriteRenderer());
-        this.addGameObjectToScene(this.testObj);
+        this.camera = new Camera(new Vector2f(-250,0)); //camera at 0,0
+        int xOffset = 10;
+        int yOffset = 10;
+        int padding = 0;
 
-        this.camera = new Camera(new Vector2f()); //camera at 0,0
-        defaultShader = new Shader("assets/shaders/default.glsl");
+        float totalWidth = (float)(600-xOffset*2);
+        float totalHeight = (float)(300-yOffset*2);
+        float sizeX = totalWidth/100.f;
+        float sizeY = totalHeight/100.f;
+        
+        //CREATE 10000 quads (userò 10 batches quindi)
+        for (int x = 0; x < 100; x++) {
+            for (int y = 0; y < 100; y++) {
+                float xPos = xOffset + (x*sizeX) + (x*padding);
+                float yPos = yOffset + (y*sizeY) + (y*padding);
 
-        //COMPILE AND LINK SHADERS
-        defaultShader.compileAndLink();
-
-        //CREATE THE TEXTURE ON GPU
-        testTexture = new Texture("assets/images/testImage.png");
-
-
-        //GENERATE VAO, VBO, EBObuffer objects and send to GPU
-        vaoID =  glGenVertexArrays();
-        glBindVertexArray(vaoID);
-
-        //Create a float buffer (required by GPU) for the vertex
-        FloatBuffer vertexBuffer = BufferUtils.createFloatBuffer(vertexArray.length);
-        vertexBuffer.put(vertexArray).flip(); //FLIP IS FOR GPU expecting order of VBO
-        //CREATE THE VBO and upload to it the vertex floatbuffer
-        vboID = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferData(GL_ARRAY_BUFFER, vertexBuffer, GL_STATIC_DRAW); // tell to draw the vertices and no more actions
-
-        //create the indices and uplaod
-        IntBuffer elementBuffer = BufferUtils.createIntBuffer(elementArray.length);
-        elementBuffer.put(elementArray).flip();
-
-        eboID = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eboID); //NOT AN ARRAY BUFFER BUT AN ELEMENT
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,elementBuffer,GL_STATIC_DRAW);
-
-        //ADD VERTEX ATTRIBUTES POINTERS - spcify we'll use three coords and 4 numbers for color and the stride is 7
-        int positionsSize = 3; //x,y,z
-        int colorsSize = 4;
-        int uvSize = 2;
-        int vertexSizeBytes = (positionsSize+colorsSize+uvSize)*Float.BYTES; //TOTAL BYTES OF A VERTEX
-
-        glVertexAttribPointer(0,positionsSize,GL_FLOAT,false, vertexSizeBytes,0); //pointer is the offset
-        glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1,colorsSize,GL_FLOAT,false,vertexSizeBytes,positionsSize*Float.BYTES);//three bytes after the x
-        glEnableVertexAttribArray(1);
-
-        glVertexAttribPointer(2, uvSize, GL_FLOAT, false,vertexSizeBytes,(positionsSize+colorsSize)*Float.BYTES);
-        glEnableVertexAttribArray(2);
-
+                GameObject go = new GameObject("Obj_"+x+"_"+y,new Transform(new Vector2f(xPos,yPos),new Vector2f(sizeX,sizeY)));
+                go.addComponent(new SpriteRenderer(new Vector4f(xPos/totalWidth, yPos/totalHeight,1,1))); //il colore che uso red e green in funz della posiz
+                this.addGameObjectToScene(go);
+            }
+        }
 
     }
 
@@ -133,51 +45,17 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
-        //MOVE THE CAMERA
-//        camera.position.x -= dt*50.0f;
-//        camera.position.y -= dt*20.0f;
-//        System.out.println("We are running at " + (1.0f/dt) + " FPS");
-        //Bind shader program
-        defaultShader.use();
-
-        //UPLOAD the texture
-        defaultShader.uploadTexture("TEX_SAMPLER",0); //USE THE SLOT 0
-        glActiveTexture(GL_TEXTURE0); //ACTIVATE THE SLOT 0
-        testTexture.bind();
-
-        //BEFORE BINDING THE OBJECTS WE SET UP THE OBJECT IN THE WORLD AND PROJECT TO THE VIEW COORDS
-        defaultShader.uploadMat4f("uProj",camera.getProjectionMatrix());
-        defaultShader.uploadMat4f("uView",camera.getViewMatrix());
-
-        defaultShader.uploadFloat("uTime", Time.getTime());
-
-        //BIND the VAO
-        glBindVertexArray(vaoID);
-
-        //enable vertex array attributes
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-        //DRAW!
-        glDrawElements(GL_TRIANGLES,elementArray.length,GL_UNSIGNED_INT,0);
-
-        //UNBIND EVERYTHING!
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glBindVertexArray(0); //bind to "0" = no bind
-        defaultShader.detach(); // don't use PrgramSahder anymore
-
-        if(firstTime){
-            System.out.println("Creating gameObject!");
-            GameObject go = new GameObject("test object 2");
-            go.addComponent(new SpriteRenderer());
-            this.addGameObjectToScene(go);
-            firstTime = false;
+//        System.out.println("FPS: "+(1.f/dt));
+        if(KeyListener.isKeyPressed(GLFW_KEY_RIGHT)){
+            camera.position.x -= 100f*dt;
+        }else if (KeyListener.isKeyPressed(GLFW_KEY_LEFT)){
+            camera.position.x += 100f*dt;
         }
-
 
         for (GameObject go : this.gameObjects) {
             go.uodate(dt); //AD OGNI FRAME GIRO I GAME OBJ E LI FACCIO AGGIORNARE ALLO STEP DT
         }
+        this.renderer.render();
     }
+
 }
