@@ -3,10 +3,6 @@ package jade;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-import util.Time;
-
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -132,7 +128,7 @@ public class Window {
 
     public void loop() {
         //TIME OF START OF THE FRAME
-        float beginTime = Time.getTime();
+        float beginTime = (float)glfwGetTime();
         float endTime; //HERE THE FRAME ENDS
         float dt = -1.0f;
 
@@ -160,7 +156,7 @@ public class Window {
             //swap automatically our buffers
             glfwSwapBuffers(glfwWindow);
 
-            endTime = Time.getTime();
+            endTime = (float)glfwGetTime();
             dt = endTime - beginTime; //DELTA OF THE FRAME
             beginTime = endTime; //resetting time for the next frame
         }//MAIN LOOP

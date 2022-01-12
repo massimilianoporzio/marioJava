@@ -4,6 +4,7 @@ package jade;
 import components.SpriteRenderer;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
+import util.AssetPool;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
@@ -39,8 +40,13 @@ public class LevelEditorScene extends Scene{
             }
         }
 
+        loadResources();
+
     }
 
+    private void loadResources() {
+        AssetPool.getShader("assets/shaders/default.glsl");
+    }
 
 
     @Override
