@@ -27,9 +27,14 @@ public class Renderer {
         boolean added = false; //serve per vedere se sono riuscito ad agg (spazio esaurisce!)
         for (RenderBatch batch: batches) {
             if(batch.hasRoom()){
-                batch.addSprite(spr);
-                added = true;
-                break;
+                Texture tex = spr.getTexture();
+                if(tex == null || batch.hasTexture(tex) || batch.hasTextureRoom()){
+                    //se c'è spazio per una nuova tex
+                    batch.addSprite(spr);
+                    added = true;
+                    break;
+                }
+
             }
         }//giro i batches per vedere se ho spazio
         if(!added){
