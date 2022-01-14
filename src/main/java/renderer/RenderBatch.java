@@ -31,7 +31,7 @@ public class RenderBatch {
     private final int VERTEX_SIZE = 9;
     private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 
-    private SpriteRenderer[] sprites;
+    private SpriteRenderer[] spriteRenderers;
     private int numSprites;
     private boolean hasRoom;
     private float[] vertices;
@@ -44,7 +44,7 @@ public class RenderBatch {
 
     public RenderBatch(int maxBatchSize) {
         shader = AssetPool.getShader("assets/shaders/default.glsl");
-        this.sprites = new SpriteRenderer[maxBatchSize];
+        this.spriteRenderers = new SpriteRenderer[maxBatchSize];
         this.maxBatchSize = maxBatchSize;
 
         // 4 vertices quads
@@ -88,7 +88,7 @@ public class RenderBatch {
     public void addSprite(SpriteRenderer spr) {
         // Get index and add renderObject
         int index = this.numSprites;
-        this.sprites[index] = spr;
+        this.spriteRenderers[index] = spr;
         this.numSprites++;
 
         if (spr.getTexture() != null) {
@@ -106,10 +106,23 @@ public class RenderBatch {
     }
 
     public void render() {
-        // For now, we will rebuffer all data every frame
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        boolean rebufferData = false; //lo metto a true se anche un solo sprite cambia
+        for (int i = 0; i < numSprites; i++) {
+            SpriteRenderer spr = spriteRenderers[i];
+            if(spr.isDirty()){
+                loadVertexProperties(i); //CARICO LE PROPERTIES CAMBIATE
+                rebufferData = true;
+                spr.setClean(); // LO RESETTO A CLEAN
+            }
+        }
 
+
+        // For now, we will rebuffer all data every frame
+        //NOW CHANGE ONLY IF ANY SPRITE WAS DIRTY
+        if(rebufferData) {
+            glBindBuffer(GL_ARRAY_BUFFER, vboID);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        }
         // Use shader
         shader.use();
         shader.uploadMat4f("uProjection", Window.getScene().getCamera().getProjectionMatrix());
@@ -137,7 +150,7 @@ public class RenderBatch {
     }
 
     private void loadVertexProperties(int index) {
-        SpriteRenderer sprite = this.sprites[index];
+        SpriteRenderer sprite = this.spriteRenderers[index];
 
         // Find offset within array (4 vertices per sprite)
         int offset = index * 4 * VERTEX_SIZE;
