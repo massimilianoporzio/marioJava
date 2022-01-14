@@ -14,6 +14,9 @@ import static util.Constants.noYAxesMoved;
 public class Window {
     int width, height;
     String title;
+
+    private long glfwWindow;
+    private ImGuiLayer imguiLayer;
     // private constructor nobody directly instantiate it and a singleton
     private static  Window window = null;
 
@@ -37,7 +40,7 @@ public class Window {
         }
     }
 
-    private long glfwWindow; //memory address of the window
+
     public float r, g, b, a;
     private boolean fadeToBlack = false;
 
@@ -91,7 +94,8 @@ public class Window {
         glfwDefaultWindowHints(); //resizible, visible etc.
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); //not visible until we actually create the Window.
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); //user can resize it
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE); //maxed as default
+//        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE); //maxed as default
+
 
         //Create the window
          glfwWindow = glfwCreateWindow(this.width, this.height, this.title, NULL, NULL);
@@ -99,14 +103,23 @@ public class Window {
              //window is not created
              throw new IllegalStateException("Failed to create the GFLW window.");
          }
+
          //REGISTER MOUSE LISTENER
          glfwSetCursorPosCallback(glfwWindow,MouseListener::mousePosCallback);
          glfwSetMouseButtonCallback(glfwWindow,MouseListener::mouseButtonCallback);
          glfwSetScrollCallback(glfwWindow,MouseListener::mouseScrollCallBack);
 
 
+
+
+
          //REGISTER KEY LISTENER
         glfwSetKeyCallback(glfwWindow,KeyListener::KeyCallback);
+
+        glfwSetWindowSizeCallback(glfwWindow, (w, newWidth, newHeight)->{
+            Window.setWidth(newWidth);
+            Window.setHeight(newHeight);
+        });
 
          //MAKE the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
@@ -114,7 +127,7 @@ public class Window {
         glfwSwapInterval(1); //swap every frame . Monitor goes as fast as possible
         //make the window visible
         glfwShowWindow(glfwWindow);
-
+        glfwMaximizeWindow(glfwWindow); //SO THE SCALE IS SET USING THE CALLBACK
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
@@ -124,6 +137,9 @@ public class Window {
         //ENABLE BLEND!
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA); //colore final = col iniz + (1-alpha)*color iniziale
+
+        this.imguiLayer = new ImGuiLayer(glfwWindow);
+        this.imguiLayer.initImGui();
 
         //INIT SCENE
         Window.changeToScene(0);
@@ -156,6 +172,7 @@ public class Window {
             if(!Float.isNaN(yAxisValue) && yAxisValue!=noYAxesMoved ) {
                 System.out.println("y Axis value is: " + yAxisValue);
             }
+            this.imguiLayer.update(dt);
             //swap automatically our buffers
             glfwSwapBuffers(glfwWindow);
 
@@ -163,5 +180,21 @@ public class Window {
             dt = endTime - beginTime; //DELTA OF THE FRAME
             beginTime = endTime; //resetting time for the next frame
         }//MAIN LOOP
+    }
+
+    public static int getWidth() {
+        return get().width;
+    }
+
+    public static int getHeight() {
+        return get().height;
+    }
+
+    public static void setWidth(int newWidth) {
+        get().width = newWidth;
+    }
+
+    public static void setHeight(int newHeight) {
+        get().height = newHeight;
     }
 }
