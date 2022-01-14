@@ -47,9 +47,9 @@ public class Window {
         this.width = 1366;
         this.height = 768;
         this.title = "Mario";
-        this.r = 0;
-        this.b = 0;
-        this.g = 0 ; //BLACK BACKGROUND
+        this.r = 1;
+        this.b = 1;
+        this.g = 1 ; //BLACK BACKGROUND
         this.a = 1;
 
     }
@@ -121,6 +121,9 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities(); //use binding for OpenGL
+        //ENABLE BLEND!
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA); //colore final = col iniz + (1-alpha)*color iniziale
 
         //INIT SCENE
         Window.changeToScene(0);
