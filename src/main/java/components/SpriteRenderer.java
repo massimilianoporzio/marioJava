@@ -1,5 +1,6 @@
 package components;
 
+import imgui.ImGui;
 import jade.Component;
 import jade.Transform;
 import org.joml.Vector2f;
@@ -36,6 +37,17 @@ public class SpriteRenderer extends Component {
             //THE GAME OBJECT HAS CHANGES POSITION AND/OR SCALE SO ALSO THE SPRITE HAS TO CHANGE!
             this.gameObject.transform.copy(this.lastTransform); //AGGIORNO LAST TRANSFORM CON la transform del game obj
             isDirty = true;
+        }
+
+    }
+
+    @Override
+    public void imgui() {
+        float[] imguiColor = {color.x, color.y, color.z, color.w};
+        if(ImGui.colorPicker4("Color picker: ",imguiColor)){
+            //COLOR CHANGED
+            this.color.set(imguiColor[0],imguiColor[1],imguiColor[2],imguiColor[3]);
+            this.isDirty = true; //color cambiato
         }
 
     }
