@@ -4,6 +4,7 @@ package jade;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.Spritesheet;
+import imgui.ImGui;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import util.AssetPool;
@@ -59,6 +60,13 @@ public class LevelEditorScene extends Scene{
     private int spriteIndex = 0;
     private float spriteFlipTime = 0.2f;
     private float spriteFlipTimeLeft = 0.0f;
+
+    @Override
+    public void imgui() {
+        ImGui.begin("Test Window");
+        ImGui.text("CIAO CIAO");
+        ImGui.end();
+    }
 
     @Override
     public void update(float dt) {

@@ -172,7 +172,7 @@ public class Window {
             if(!Float.isNaN(yAxisValue) && yAxisValue!=noYAxesMoved ) {
                 System.out.println("y Axis value is: " + yAxisValue);
             }
-            this.imguiLayer.update(dt);
+            this.imguiLayer.update(dt, currentScene);
             //swap automatically our buffers
             glfwSwapBuffers(glfwWindow);
 

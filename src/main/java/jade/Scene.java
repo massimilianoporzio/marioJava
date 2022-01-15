@@ -1,5 +1,6 @@
 package jade;
 
+import imgui.ImGui;
 import renderer.Renderer;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ public abstract class Scene {
     protected Camera camera;
     private boolean isRunning = false;
     protected List<GameObject> gameObjects = new ArrayList<>();
+    protected GameObject activeObject = null; //quello "cliccato"
 
     public Scene() {
     }
@@ -48,4 +50,17 @@ public abstract class Scene {
     public void init(){
         //TO OVERRIDE IF NECESSARY ON subclasses
     };
+
+    public void sceneImgui() {
+        if(activeObject != null){
+            ImGui.begin("Inspector"); //CREO FINESTRA PER l'active gameObject
+            activeObject.imgui();
+            ImGui.end();
+        }
+        imgui();
+    }
+
+    public void imgui(){
+
+    }
 }
