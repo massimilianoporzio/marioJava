@@ -13,7 +13,11 @@ public class Texture {
     private int textID;
     private int width, height;
 
-//    public Texture(String filepath) {
+    public int getTextID() {
+        return textID;
+    }
+
+    //    public Texture(String filepath) {
 //
 //    }
 
