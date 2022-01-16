@@ -26,18 +26,19 @@ public class Window {
         switch (newScene){
             case 0:
                 currentScene =  new LevelEditorScene();
-                currentScene.init();
-                currentScene.start(); //AFTER INIT START
+
                 break;
             case 1:
                 currentScene = new LevelScene();
-                currentScene.init();
-                currentScene.start(); //AFTER INIT START
                 break;
             default:
                 assert false : "Unknown scene '" + newScene +"'";
                 break;
+
         }
+        currentScene.load();
+        currentScene.init();
+        currentScene.start(); //AFTER INIT START
     }
 
 
@@ -180,6 +181,7 @@ public class Window {
             dt = endTime - beginTime; //DELTA OF THE FRAME
             beginTime = endTime; //resetting time for the next frame
         }//MAIN LOOP
+        currentScene.saveExit();//QUANDO CHIUDO LA FINESTRA
     }
 
     public static int getWidth() {

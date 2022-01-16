@@ -8,48 +8,45 @@ import org.joml.Vector4f;
 import renderer.Texture;
 
 public class SpriteRenderer extends Component {
-    private Vector4f color;
-    private Sprite sprite;
 
-    private Transform lastTransform; //last position / camera / scale / etc
-    private boolean isDirty = false; //SE DEVO FARE UPDATE
+    private Vector4f color = new Vector4f(1, 1, 1, 1);
+    private Sprite sprite = new Sprite();
 
-    public SpriteRenderer(Vector4f color) {
-        this.color = color;
-        this.sprite = new Sprite(null);
-        this.isDirty = true; //appena creato è dirty! va disegnato
-    }
+    private transient Transform lastTransform;
+    private transient boolean isDirty = true;
 
-    public SpriteRenderer(Sprite sprite) {
-        this.sprite = sprite;
-        this.color = new Vector4f(1, 1, 1, 1);
-        this.isDirty = true; //appena creato è dirty! va disegnato
-    }
+//    public SpriteRenderer(Vector4f color) {
+//        this.color = color;
+//        this.sprite = new Sprite(null);
+//        this.isDirty = true;
+//    }
+//
+//    public SpriteRenderer(Sprite sprite) {
+//        this.sprite = sprite;
+//        this.color = new Vector4f(1, 1, 1, 1);
+//        this.isDirty = true;
+//    }
 
     @Override
     public void start() {
-        this.lastTransform = gameObject.transform.copy(); //copy from the gameobject so if it changes also the sprite
+        this.lastTransform = gameObject.transform.copy();
     }
 
     @Override
     public void update(float dt) {
-        if(!this.lastTransform.equals(this.gameObject.transform)){
-            //THE GAME OBJECT HAS CHANGES POSITION AND/OR SCALE SO ALSO THE SPRITE HAS TO CHANGE!
-            this.gameObject.transform.copy(this.lastTransform); //AGGIORNO LAST TRANSFORM CON la transform del game obj
+        if (!this.lastTransform.equals(this.gameObject.transform)) {
+            this.gameObject.transform.copy(this.lastTransform);
             isDirty = true;
         }
-
     }
 
     @Override
     public void imgui() {
-        float[] imguiColor = {color.x, color.y, color.z, color.w};
-        if(ImGui.colorPicker4("Color picker: ",imguiColor)){
-            //COLOR CHANGED
-            this.color.set(imguiColor[0],imguiColor[1],imguiColor[2],imguiColor[3]);
-            this.isDirty = true; //color cambiato
+        float[] imColor = {color.x, color.y, color.z, color.w};
+        if (ImGui.colorPicker4("Color Picker: ", imColor)) {
+            this.color.set(imColor[0], imColor[1], imColor[2], imColor[3]);
+            this.isDirty = true;
         }
-
     }
 
     public Vector4f getColor() {
@@ -65,23 +62,22 @@ public class SpriteRenderer extends Component {
     }
 
     public void setSprite(Sprite sprite) {
-        this.sprite = sprite; //DA FARE ANALOGO A COLOR (NON DIRTI SE è LO STESSO SPRITE
-        this.isDirty = true; //perché ho appena chiamato il metodo per agg lo Sprite
+        this.sprite = sprite;
+        this.isDirty = true;
     }
 
     public void setColor(Vector4f color) {
-         if(!this.color.equals(color)){
-            this.color.set(color); //lo cambio solo se sono diversi!
-            this.isDirty = true; //perché hho appena cambiato il color
+        if (!this.color.equals(color)) {
+            this.isDirty = true;
+            this.color.set(color);
         }
-
     }
 
     public boolean isDirty() {
-        return isDirty;
+        return this.isDirty;
     }
 
-    public void setClean(){
+    public void setClean() {
         this.isDirty = false;
     }
 }

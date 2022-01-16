@@ -1,6 +1,9 @@
 package jade;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import components.Rigidbody;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.Spritesheet;
@@ -10,6 +13,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import util.AssetPool;
 
+import javax.crypto.Cipher;
 import java.util.SortedMap;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -17,7 +21,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public class LevelEditorScene extends Scene{
     private GameObject obj1;
     private Spritesheet sprites;
-
+    private SpriteRenderer obj1Sprite;
     public LevelEditorScene() {
 
     }
@@ -26,29 +30,30 @@ public class LevelEditorScene extends Scene{
     public void init() {
         loadResources();
         this.camera = new Camera(new Vector2f(-250, 0));
+        if (levelLoaded) {
+            this.activeGameObject = gameObjects.get(0);
+            return;
+        }
 
         sprites = AssetPool.getSpritesheet("assets/images/spritesheet.png");
 
-        GameObject obj2 = new GameObject("Object 2", new Transform(new Vector2f(400, 100), new Vector2f(256, 256)),
-                1);
-//        obj2.addComponent(new SpriteRenderer(sprites.getSprite(15)));
-        obj2.addComponent(new SpriteRenderer(new Sprite(
-                AssetPool.getTexture("assets/images/blendImage2.png")
-        )));
-        this.addGameObjectToScene(obj2);
-
-        obj1 = new GameObject("Object 1", new Transform(new Vector2f(200, 100), new Vector2f(256, 256)),
-                2);
-//        obj1.addComponent(new SpriteRenderer(sprites.getSprite(0)));
-//        obj1.addComponent(new SpriteRenderer(new Sprite(
-//                AssetPool.getTexture("assets/images/blendImage1.png")
-        obj1.addComponent(new SpriteRenderer(new Vector4f(1,0,0,1))
-        );
+        obj1 = new GameObject("Object 1", new Transform(new Vector2f(200, 100),
+                new Vector2f(256, 256)), 2);
+        obj1Sprite = new SpriteRenderer();
+        obj1Sprite.setColor(new Vector4f(1, 0, 0, 1));
+        obj1.addComponent(obj1Sprite);
+        obj1.addComponent(new Rigidbody());
         this.addGameObjectToScene(obj1);
-        this.activeObject = obj1;
+        this.activeGameObject = obj1;
 
-
-
+        GameObject obj2 = new GameObject("Object 2",
+                new Transform(new Vector2f(400, 100), new Vector2f(256, 256)), 3);
+        SpriteRenderer obj2SpriteRenderer = new SpriteRenderer();
+        Sprite obj2Sprite = new Sprite();
+        obj2Sprite.setTexture(AssetPool.getTexture("assets/images/blendImage2.png"));
+        obj2SpriteRenderer.setSprite(obj2Sprite);
+        obj2.addComponent(obj2SpriteRenderer);
+        this.addGameObjectToScene(obj2);
     }
 
     private void loadResources() {
@@ -57,6 +62,7 @@ public class LevelEditorScene extends Scene{
         AssetPool.addSpritesheet("assets/images/spritesheet.png",
                 new Spritesheet(AssetPool.getTexture("assets/images/spritesheet.png"),
                         16,16, 26,0));
+        AssetPool.getTexture("assets/images/blendImage2.png");
     }
 
     private int spriteIndex = 0;
@@ -72,27 +78,6 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
-//        spriteFlipTimeLeft -= dt; //PASSA IL TEMPO
-////        if (KeyListener.isKeyPressed(GLFW_KEY_RIGHT)) {
-////            camera.position.x -= 100f * dt;
-////        } else if (KeyListener.isKeyPressed(GLFW_KEY_LEFT)) {
-////            camera.position.x += 100f * dt;
-////        }
-////        if (KeyListener.isKeyPressed(GLFW_KEY_UP)) {
-////            camera.position.y -= 100f * dt;
-////        } else if (KeyListener.isKeyPressed(GLFW_KEY_DOWN)) {
-////            camera.position.y += 100f * dt;
-////        }
-//        if (spriteFlipTimeLeft <= 0){
-//            spriteFlipTimeLeft = spriteFlipTime; //RESET TGE TIME FOR THE ANIMATION
-//            spriteIndex++;
-//            if(spriteIndex > 4){
-//                //reset inizio animazione
-//                spriteIndex = 0;
-//            }
-//            obj1.getComponent(SpriteRenderer.class).setSprite(sprites.getSprite(spriteIndex));
-//        }
-
         for (GameObject go : this.gameObjects) {
             go.update(dt);
         }

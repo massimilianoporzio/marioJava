@@ -10,6 +10,14 @@ public class Spritesheet {
     private Texture texture;
     private List<Sprite> sprites;
 
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
+
+    public void setSprites(List<Sprite> sprites) {
+        this.sprites = sprites;
+    }
+
     public Spritesheet(Texture texture, int spriteWidth, int spriteHeight, int numSprites, int spacing) {
         this.sprites = new ArrayList<>();
 
@@ -28,7 +36,10 @@ public class Spritesheet {
                     new Vector2f(leftX, bottomY),
                     new Vector2f(leftX, topY)
             };
-            Sprite sprite = new Sprite(this.texture, texCoords);
+            Sprite sprite = new Sprite();
+            sprite.setTexture(this.texture);
+            sprite.setTexCoords(texCoords);
+
             this.sprites.add(sprite);
 
             currentX += spriteWidth + spacing;

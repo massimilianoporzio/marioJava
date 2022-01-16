@@ -1,66 +1,108 @@
 package jade;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import imgui.ImGui;
 import renderer.Renderer;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Scene {
-    //MAY CONTAIN PHYSICS, GAME STUFF , RENDERER,...
+
     protected Renderer renderer = new Renderer();
     protected Camera camera;
     private boolean isRunning = false;
     protected List<GameObject> gameObjects = new ArrayList<>();
-    protected GameObject activeObject = null; //quello "cliccato"
+    protected GameObject activeGameObject = null;
+    protected boolean levelLoaded = false;
 
     public Scene() {
+
     }
 
-    public Camera getCamera() {
-        return camera;
+    public void init() {
+
     }
 
-    //UPDATE THE STATE OF OUR SCENE
-    public abstract void update(float dt);
-
-    //start the scene (equals to start each GameObject)
-    public void start(){
-        for (GameObject go: gameObjects
-             ) {
+    public void start() {
+        for (GameObject go : gameObjects) {
             go.start();
-            renderer.add(go); //agg l'oggetto al renderer
+            this.renderer.add(go);
         }
         isRunning = true;
-
     }
 
-    //add GameObjects to the scene
-    public void addGameObjectToScene(GameObject go){
-        if(!isRunning){
-            //DO NOTHING
+    public void addGameObjectToScene(GameObject go) {
+        if (!isRunning) {
             gameObjects.add(go);
-        }else{
+        } else {
             gameObjects.add(go);
-            go.start(); //START IMMEDIATELY THE GAME OBJECT IF THE SCENE IS NOT RUNNING
-            renderer.add(go); //agg l'ogg al renderer
+            go.start();
+            this.renderer.add(go);
         }
     }
 
-    public void init(){
-        //TO OVERRIDE IF NECESSARY ON subclasses
-    };
+    public abstract void update(float dt);
+
+    public Camera camera() {
+        return this.camera;
+    }
 
     public void sceneImgui() {
-        if(activeObject != null){
-            ImGui.begin("Inspector"); //CREO FINESTRA PER l'active gameObject
-            activeObject.imgui();
+        if (activeGameObject != null) {
+            ImGui.begin("Inspector");
+            activeGameObject.imgui();
             ImGui.end();
         }
+
         imgui();
     }
 
-    public void imgui(){
+    public void imgui() {
 
+    }
+
+    public void saveExit() {
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Component.class, new ComponentSerializer())
+                .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
+                .create();
+
+        try {
+            FileWriter writer = new FileWriter("level.txt");
+            writer.write(gson.toJson(this.gameObjects));
+            writer.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void load() {
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(Component.class, new ComponentDeserializer())
+                .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
+                .create();
+
+        String inFile = "";
+        try {
+            inFile = new String(Files.readAllBytes(Paths.get("level.txt")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (!inFile.equals("")) {
+            GameObject[] objs = gson.fromJson(inFile, GameObject[].class);
+            for (int i=0; i < objs.length; i++) {
+                addGameObjectToScene(objs[i]);
+            }
+            this.levelLoaded = true;
+        }
     }
 }
