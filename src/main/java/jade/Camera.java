@@ -6,13 +6,15 @@ import org.joml.Vector3f;
 
 public class Camera {
 
-    private Matrix4f projectionMatrix, viewMatrix;
+    private Matrix4f projectionMatrix, viewMatrix, inverseProjection, inverseView;
     public Vector2f position;
 
     public Camera(Vector2f position) {
         this.position = position;
         this.projectionMatrix = new Matrix4f();
         this.viewMatrix = new Matrix4f();
+        this.inverseProjection = new Matrix4f();
+        this.inverseView = new Matrix4f();
         adjustProjection();
     }
 
@@ -20,6 +22,8 @@ public class Camera {
         projectionMatrix.identity();
         //CREATE THE PROJ MATRIX USING THE ORTHO PROJECTION (stesse dimensioni a spostarci lungo z (2d game))
         projectionMatrix.ortho(0.0f, 32.0f*40.0f, 0.0f, 32.0f*21.0f,0.f, 100.f);
+        //E CREO ANCHE LA INVERSA
+        projectionMatrix.invert(inverseProjection);
     }
 
     public Matrix4f getViewMatrix(){
@@ -30,7 +34,16 @@ public class Camera {
         viewMatrix = viewMatrix.lookAt(new Vector3f(position.x, position.y ,20.f),
                 cameraFront.add(position.x,position.y,0.0f),
                 cameraUp);
+        this.viewMatrix.invert(inverseView);//ogni volta cha aggiusto la matrice View faccio anche l'inversa
         return this.viewMatrix;
+    }
+
+    public Matrix4f getInverseProjection() {
+        return inverseProjection;
+    }
+
+    public Matrix4f getInverseView() {
+        return inverseView;
     }
 
     public Matrix4f getProjectionMatrix() {

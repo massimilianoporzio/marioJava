@@ -114,6 +114,8 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
+        MouseListener.getOrthoX();
+
         for (GameObject go : this.gameObjects) {
             go.update(dt);
         }

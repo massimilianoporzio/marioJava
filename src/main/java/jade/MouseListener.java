@@ -1,5 +1,7 @@
 package jade;
 
+import org.joml.Vector4f;
+
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
@@ -64,6 +66,30 @@ public class MouseListener {
     //GETTERS FOR POSITION
     public static float  getX() {
         return (float)get().xPos;
+    }
+
+    public static float getOrthoX(){
+        //per avere le coord nella proiez (orthogonal)
+        float currentX = getX(); //prendo la coord
+        currentX = (currentX/(float) Window.getWidth())*2.f -1f; //la normalizzo risp alla dim attuale della finestra
+        Vector4f tmp = new Vector4f(currentX,0,0,1); //per moltipl il vettore che rappr la mia currentX
+        //P-1 * V-1 * aCoord
+        tmp.mul(Window.getScene().camera().getInverseProjection()).mul(Window.getScene().camera().getInverseView());
+        currentX = tmp.x;
+        System.out.println("currentX: "+currentX);
+        //IN PRATICA OTTENGO SEMPRE LE COORD DEL MONDO REALE (ABBIAMO MESSO LA CAMERA A -250 INIZIALE E CON UNA VISTA
+        // DI 32*40 = 1020.!!! ANCHE SE CAMBIO LE DIMENSIONI DELLA FINIESTRA!!!!!
+        return -1;
+
+    }
+
+
+    public static float getOrthoY(){
+        //per avere le coord nella proiez (orthogonal)
+        float currentY = getY();
+
+        return -1;
+
     }
 
     public static float getY() {
