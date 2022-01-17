@@ -10,6 +10,10 @@ import java.lang.reflect.Modifier;
 
 public abstract class Component {
 
+    private static int ID_COUNTER = 0; //GLOBVAL COUNTER DEI COMPONENTS
+
+    private int uid = -1; //ID OV THE SINGLE COMPONENT
+
     public transient GameObject gameObject = null; //ref to the gameObject it is related to
 
     public void update(float dt){
@@ -80,6 +84,21 @@ public abstract class Component {
         }catch(IllegalAccessException e){
             e.printStackTrace();
         }
+    }
+
+    public void genereateId(){
+        if(this.uid == -1){
+            this.uid = ID_COUNTER++; //PRIMO COMPONENT: uid = 1 ID_COUNTER = 1 etc
+        }
+    }
+
+    public int getUid(){
+        return this.uid;
+    }
+
+    public static void init(int maxId){
+        ID_COUNTER = maxId; //QUANDO CARICO DA FILE AVRò UN po' di oggetti allora inizializzo il contatore con maxId
+        //E RIPARTO DA LI A CONTARE
     }
 
 }

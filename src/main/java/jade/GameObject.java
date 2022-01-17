@@ -11,19 +11,25 @@ public class GameObject {
     public Transform transform; //contiene position and scale of the object
     private int zIndex;
 
+    private static int ID_COUNTER = 0;
+    private int uid = -1;
+
     public GameObject(String name) {
         this.name = name;
         this.components = new ArrayList<>();
         this.transform = new Transform();
         this.zIndex = 0; //inizial a 0 se non passo nulla
+        this.uid = ID_COUNTER++;
     }
 
-    public GameObject(String name, Transform transform,int zIndex) {
+    public GameObject(String name, Transform transform, int i) {
         this.name = name;
         this.components = new ArrayList<>();
         this.transform = transform;
-        this.zIndex = zIndex;
+        this.zIndex = i;
+        this.uid = ID_COUNTER++;
     }
+
 
     public <T extends Component> T getComponent(Class<T> componentClass){
         for(Component c : components){
@@ -51,6 +57,7 @@ public class GameObject {
     }
 
     public void addComponent(Component c){
+        c.genereateId(); //SE HA GIà ID NON SARà GENERATO UN NUOVO UID (flag -1 per i nuovi)
         this.components.add(c);
         c.gameObject = this;
     }
@@ -71,10 +78,23 @@ public class GameObject {
         return zIndex;
     }
 
+
+    public static void init(int maxId){
+        ID_COUNTER = maxId;
+    }
+
+    public int getUid() {
+        return uid;
+    }
+
     public void imgui(){
         for (Component c :
                 components) {
             c.imgui();
         }
+    }
+
+    public List<Component> getAllComponents(){
+        return this.components;
     }
 }
