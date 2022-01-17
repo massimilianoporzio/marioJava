@@ -76,19 +76,26 @@ public class MouseListener {
         //P-1 * V-1 * aCoord
         tmp.mul(Window.getScene().camera().getInverseProjection()).mul(Window.getScene().camera().getInverseView());
         currentX = tmp.x;
-        System.out.println("currentX: "+currentX);
+//        System.out.println("currentX: "+currentX);
         //IN PRATICA OTTENGO SEMPRE LE COORD DEL MONDO REALE (ABBIAMO MESSO LA CAMERA A -250 INIZIALE E CON UNA VISTA
         // DI 32*40 = 1020.!!! ANCHE SE CAMBIO LE DIMENSIONI DELLA FINIESTRA!!!!!
-        return -1;
+        return currentX;
 
     }
 
 
     public static float getOrthoY(){
         //per avere le coord nella proiez (orthogonal)
-        float currentY = getY();
-
-        return -1;
+        float currentY = getY(); //prendo la coord
+        currentY = (currentY/(float) Window.getHeight())*2.f -1f; //la normalizzo risp alla dim attuale della finestra
+        Vector4f tmp = new Vector4f(0,currentY,0,1); //per moltipl il vettore che rappr la mia currentX
+        //P-1 * V-1 * aCoord
+        tmp.mul(Window.getScene().camera().getInverseProjection()).mul(Window.getScene().camera().getInverseView());
+        currentY = tmp.y;
+        System.out.println("currentX: "+currentY);
+        //IN PRATICA OTTENGO SEMPRE LE COORD DEL MONDO REALE (ABBIAMO MESSO LA CAMERA A -250 INIZIALE E CON UNA VISTA
+        // DI 32*40 = 1020.!!! ANCHE SE CAMBIO LE DIMENSIONI DELLA FINIESTRA!!!!!
+        return currentY;
 
     }
 
