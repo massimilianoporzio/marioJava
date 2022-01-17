@@ -1,16 +1,10 @@
 package scenes;
 
 
-import components.Rigidbody;
-import components.Sprite;
-import components.SpriteRenderer;
-import components.Spritesheet;
+import components.*;
 import imgui.ImGui;
 import imgui.ImVec2;
-import jade.Camera;
-import jade.GameObject;
-import jade.MouseListener;
-import jade.Transform;
+import jade.*;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import scenes.Scene;
@@ -20,6 +14,10 @@ public class LevelEditorScene extends Scene {
     private GameObject obj1;
     private Spritesheet sprites;
     private SpriteRenderer obj1Sprite;
+    MouseControls mouseControls = new MouseControls();
+
+
+
     public LevelEditorScene() {
 
     }
@@ -92,8 +90,12 @@ public class LevelEditorScene extends Scene {
             if (ImGui.imageButton(id, spriteWidth, spriteHeight,
                     texCoords[2].x,texCoords[0].y,
                     texCoords[0].x,texCoords[2].y)){
-                System.out.println("Button " +i+ " clicked"); //SE CLICCO IN QUELLE COORDINATE (e imageButton crea anche
+//                System.out.println("Button " +i+ " clicked"); //SE CLICCO IN QUELLE COORDINATE (e imageButton crea anche
                 //il bottone con l'immagine dello sprite
+                GameObject object = Prefabs.generateSpriteObject(sprite,spriteWidth, spriteHeight);
+                //ATTACH to the mouse cursor
+                mouseControls.pickupObject(object);
+
             }
             ImGui.popID();
             ImVec2 lastButtonPos = new ImVec2();
@@ -111,7 +113,8 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void update(float dt) {
-        MouseListener.getOrthoY();
+
+        mouseControls.update(dt);
         for (GameObject go : this.gameObjects) {
             go.update(dt);
         }

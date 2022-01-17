@@ -118,7 +118,7 @@ public class Window {
 
 
          //REGISTER KEY LISTENER
-        glfwSetKeyCallback(glfwWindow,KeyListener::KeyCallback);
+        glfwSetKeyCallback(glfwWindow,KeyListener::keyCallback);
 
         glfwSetWindowSizeCallback(glfwWindow, (w, newWidth, newHeight)->{
             Window.setWidth(newWidth);

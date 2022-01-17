@@ -95,6 +95,11 @@ public class ImGuiLayer {
             io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
             io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
             io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
+
+            if(!io.getWantCaptureKeyboard()){
+                //PASSO LA CHIAMATA AL MIO KEYLISTNER
+                KeyListener.keyCallback(w,key,scancode,action,mods);
+            }
         });
 
         glfwSetCharCallback(glfwWindow, (w, c) -> {
@@ -116,6 +121,10 @@ public class ImGuiLayer {
 
             if (!io.getWantCaptureMouse() && mouseDown[1]) {
                 ImGui.setWindowFocus(null);
+            }
+            //SE IMGUI NON USA IL MOUSE PASSO AL MIO MOUSELISTENER
+            if(!io.getWantCaptureMouse()){
+                MouseListener.mouseButtonCallback(glfwWindow,button,action,mods);
             }
         });
 

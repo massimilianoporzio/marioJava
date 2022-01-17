@@ -9,7 +9,7 @@ public class MouseListener {
     private static MouseListener instance; //singleton
     private double scrolLX, scrollY;
     private double xPos, yPos, lastY, lastX;
-    private boolean mouseButtonPressed[] = new boolean[3] ; // three mouse button
+    private boolean mouseButtonPressed[] = new boolean[9] ; // three mouse button
     private boolean isDragging;
 
     private MouseListener(){
@@ -86,7 +86,7 @@ public class MouseListener {
 
     public static float getOrthoY(){
         //per avere le coord nella proiez (orthogonal)
-        float currentY = getY(); //prendo la coord
+        float currentY = Window.getHeight() - getY(); //prendo la coord (tolgo dall'altezza della finestra se no è flippato)
         currentY = (currentY/(float) Window.getHeight())*2.f -1f; //la normalizzo risp alla dim attuale della finestra
         Vector4f tmp = new Vector4f(0,currentY,0,1); //per moltipl il vettore che rappr la mia currentX
         //P-1 * V-1 * aCoord
