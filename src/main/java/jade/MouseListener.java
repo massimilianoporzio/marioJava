@@ -92,7 +92,7 @@ public class MouseListener {
         //P-1 * V-1 * aCoord
         tmp.mul(Window.getScene().camera().getInverseProjection()).mul(Window.getScene().camera().getInverseView());
         currentY = tmp.y;
-        System.out.println("currentX: "+currentY);
+//        System.out.println("currentX: "+currentY);
         //IN PRATICA OTTENGO SEMPRE LE COORD DEL MONDO REALE (ABBIAMO MESSO LA CAMERA A -250 INIZIALE E CON UNA VISTA
         // DI 32*40 = 1020.!!! ANCHE SE CAMBIO LE DIMENSIONI DELLA FINIESTRA!!!!!
         return currentY;
