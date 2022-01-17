@@ -1,25 +1,22 @@
-package jade;
+package scenes;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import components.Rigidbody;
 import components.Sprite;
 import components.SpriteRenderer;
 import components.Spritesheet;
 import imgui.ImGui;
 import imgui.ImVec2;
+import jade.Camera;
+import jade.GameObject;
+import jade.MouseListener;
+import jade.Transform;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
+import scenes.Scene;
 import util.AssetPool;
 
-import javax.crypto.Cipher;
-import java.util.SortedMap;
-
-import static org.lwjgl.glfw.GLFW.*;
-
-public class LevelEditorScene extends Scene{
+public class LevelEditorScene extends Scene {
     private GameObject obj1;
     private Spritesheet sprites;
     private SpriteRenderer obj1Sprite;
@@ -114,8 +111,7 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
-        MouseListener.getOrthoX();
-
+        MouseListener.getOrthoY();
         for (GameObject go : this.gameObjects) {
             go.update(dt);
         }
