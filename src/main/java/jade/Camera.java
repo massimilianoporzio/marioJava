@@ -8,6 +8,8 @@ public class Camera {
 
     private Matrix4f projectionMatrix, viewMatrix, inverseProjection, inverseView;
     public Vector2f position;
+    private Vector2f projectionSize = new Vector2f(32.0f*40.0f,32.0f*21.0f); // dimensioni della visuale in world coords
+
 
     public Camera(Vector2f position) {
         this.position = position;
@@ -21,9 +23,15 @@ public class Camera {
     public void adjustProjection() {
         projectionMatrix.identity();
         //CREATE THE PROJ MATRIX USING THE ORTHO PROJECTION (stesse dimensioni a spostarci lungo z (2d game))
-        projectionMatrix.ortho(0.0f, 32.0f*40.0f, 0.0f, 32.0f*21.0f,0.f, 100.f);
+        //32*40 e 32*21 sono le dimensioni nelle coord del MONDO non dip da quanto è larga o alta la finestra
+        //SONO MULTIPLI DI 32 PERCHé VOGLIO DISEGNARE UNA GRIGLIA DI PASSO 32 NELL'EDITOR DEI LIVELLI
+        projectionMatrix.ortho(0.0f, projectionSize.x, 0.0f, projectionSize.y,0.f, 100.f);
         //E CREO ANCHE LA INVERSA
         projectionMatrix.invert(inverseProjection);
+    }
+
+    public Vector2f getProjectionSize() {
+        return projectionSize;
     }
 
     public Matrix4f getViewMatrix(){

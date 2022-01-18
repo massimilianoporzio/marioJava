@@ -15,8 +15,9 @@ import util.AssetPool;
 public class LevelEditorScene extends Scene {
     private GameObject obj1;
     private Spritesheet sprites;
-    private SpriteRenderer obj1Sprite;
-    MouseControls mouseControls = new MouseControls();
+    SpriteRenderer obj1Sprite;
+
+    GameObject levelEditorStuff = new GameObject("LevelEditor");
 
 
 
@@ -26,6 +27,8 @@ public class LevelEditorScene extends Scene {
 
     @Override
     public void init() {
+        levelEditorStuff.addComponent(new MouseControls());
+        levelEditorStuff.addComponent(new GridLines());
         loadResources();
         this.camera = new Camera(new Vector2f(-250, 0));
         //FIRST LOAD SPRITESHEETS
@@ -100,7 +103,7 @@ public class LevelEditorScene extends Scene {
                 //il bottone con l'immagine dello sprite
                 GameObject object = Prefabs.generateSpriteObject(sprite,spriteWidth, spriteHeight);
                 //ATTACH to the mouse cursor
-                mouseControls.pickupObject(object);
+                levelEditorStuff.getComponent(MouseControls.class).pickupObject(object);
 
             }
             ImGui.popID();
@@ -117,16 +120,11 @@ public class LevelEditorScene extends Scene {
         ImGui.end();
     }
 
-    float t = 0.0f;
+
     @Override
     public void update(float dt) {
 
-        mouseControls.update(dt);
-        float x = ((float) Math.sin(t)*200.0f) + 600;
-        float y = ((float) Math.cos(t)*200.0f) + 400;
-        t += 0.05f;
-        DebugDraw.addLine2D(new Vector2f(600,400),
-                new Vector2f(x,y),new Vector3f(0,0,1),1);
+        levelEditorStuff.update(dt);
 
         for (GameObject go : this.gameObjects) {
             go.update(dt);
