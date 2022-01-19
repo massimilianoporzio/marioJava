@@ -4,6 +4,7 @@ import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import renderer.DebugDraw;
+import renderer.Framebuffer;
 import scenes.LevelEditorScene;
 import scenes.LevelScene;
 import scenes.Scene;
@@ -21,6 +22,8 @@ public class Window {
 
     private long glfwWindow;
     private ImGuiLayer imguiLayer;
+    private Framebuffer framebuffer;
+
     // private constructor nobody directly instantiate it and a singleton
     private static  Window window = null;
 
@@ -139,12 +142,15 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities(); //use binding for OpenGL
+
         //ENABLE BLEND!
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA); //colore final = col iniz + (1-alpha)*color iniziale
 
         this.imguiLayer = new ImGuiLayer(glfwWindow);
         this.imguiLayer.initImGui();
+
+        this.framebuffer = new Framebuffer(1280,1024); //DOVREBBERO ESSERE LE DIMENSIONI DELLO SCHERMO
 
         //INIT SCENE
         Window.changeToScene(0);
@@ -166,10 +172,15 @@ public class Window {
             glClearColor(r,g,b,a); //A WHITE FULL ALPHA
             glClear(GL_COLOR_BUFFER_BIT);
 
+            this.framebuffer.bind();
             if(dt>=0.0){
                 DebugDraw.draw(); //first draw lines
                 currentScene.update(dt);
             }
+            this.framebuffer.unbind();
+            //IN PRATICA PRIMA catturo nel framebuffer la scena
+            //POI DISEGNO LA MIA GUI: in parte ha dei suoi oggetti e in parte avrà il mio framebuffer con la scena
+
 
             //PRINT AXIS VALUE
             float xAxisValue = GamePadListener.getAxisValue(GLFW_GAMEPAD_AXIS_LEFT_X);

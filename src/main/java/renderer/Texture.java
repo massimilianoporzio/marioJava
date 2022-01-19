@@ -13,6 +13,22 @@ public class Texture {
     private int textID;
     private int width, height;
 
+
+
+    public Texture(int width, int height) {
+        this.filepath = "Generated";
+
+
+        //GENERATE texture ON GPU
+        textID = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D,textID);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, //USE GL_RGBA if images have alpha!!!
+                        0, GL_RGB, GL_UNSIGNED_BYTE, 0); //NON PASSO l'IMMAGINE
+        //ALLOCA LO SPAZIO MA NON ABBIAMO L'IMMAGINE DA PASSARE
+
+    }
+
     public int getTextID() {
         return textID;
     }
@@ -23,6 +39,9 @@ public class Texture {
 
 
     public Texture() {
+        textID = -1;
+        width = -1;
+        height = -1;
     }
 
     public String getFilepath() {
