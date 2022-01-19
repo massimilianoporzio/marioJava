@@ -11,6 +11,7 @@ import org.joml.Vector4f;
 import renderer.DebugDraw;
 import scenes.Scene;
 import util.AssetPool;
+import util.Settings;
 
 public class LevelEditorScene extends Scene {
     private GameObject obj1;
@@ -42,23 +43,23 @@ public class LevelEditorScene extends Scene {
 
 
 
-        obj1 = new GameObject("Object 1", new Transform(new Vector2f(200, 100),
-                new Vector2f(256, 256)), 2);
-        obj1Sprite = new SpriteRenderer();
-        obj1Sprite.setColor(new Vector4f(1, 0, 0, 1));
-        obj1.addComponent(obj1Sprite);
-        obj1.addComponent(new Rigidbody());
-        this.addGameObjectToScene(obj1);
-        this.activeGameObject = obj1;
+//        obj1 = new GameObject("Object 1", new Transform(new Vector2f(200, 100),
+//                new Vector2f(256, 256)), 2);
+//        obj1Sprite = new SpriteRenderer();
+//        obj1Sprite.setColor(new Vector4f(1, 0, 0, 1));
+//        obj1.addComponent(obj1Sprite);
+//        obj1.addComponent(new Rigidbody());
+//        this.addGameObjectToScene(obj1);
+//        this.activeGameObject = obj1;
 
-        GameObject obj2 = new GameObject("Object 2",
-                new Transform(new Vector2f(400, 100), new Vector2f(256, 256)), 3);
-        SpriteRenderer obj2SpriteRenderer = new SpriteRenderer();
-        Sprite obj2Sprite = new Sprite();
-        obj2Sprite.setTexture(AssetPool.getTexture("assets/images/blendImage2.png"));
-        obj2SpriteRenderer.setSprite(obj2Sprite);
-        obj2.addComponent(obj2SpriteRenderer);
-        this.addGameObjectToScene(obj2);
+//        GameObject obj2 = new GameObject("Object 2",
+//                new Transform(new Vector2f(400, 100), new Vector2f(256, 256)), 3);
+//        SpriteRenderer obj2SpriteRenderer = new SpriteRenderer();
+//        Sprite obj2Sprite = new Sprite();
+//        obj2Sprite.setTexture(AssetPool.getTexture("assets/images/blendImage2.png"));
+//        obj2SpriteRenderer.setSprite(obj2Sprite);
+//        obj2.addComponent(obj2SpriteRenderer);
+//        this.addGameObjectToScene(obj2);
 
 
     }
@@ -89,8 +90,12 @@ public class LevelEditorScene extends Scene {
         float windowsX2 = windowPos.x + windowSize.x; //coord x della fine della finestra
         for (int i = 0; i < sprites.size(); i++) {
             Sprite sprite = sprites.getSprite(i);
-            float spriteWidth = sprite.getWidth() * 2; // x2 per renderli più grandi nella finestra rispetto agli attuali pixel
-            float spriteHeight = sprite.getHeight() * 2;
+//            float spriteWidth = sprite.getWidth() * 2; // x2 per renderli più grandi nella finestra rispetto agli attuali pixel
+//            float spriteHeight = sprite.getHeight() * 2;
+
+            float spriteWidth = Settings.GRID_WIDTH;
+            float spriteHeight = Settings.GRID_HEIGHT; //STESSA DIM DI VISUALIZZAZIONE DELLA GRIGLIA
+
             int id = sprite.getTexId();
             Vector2f[] texCoords = sprite.getTexCoords();
             //l'id del bottone è la textID che è la stessa perché è uno stilesheet

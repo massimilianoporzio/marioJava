@@ -132,7 +132,7 @@ public class Window {
         glfwSwapInterval(1); //swap every frame . Monitor goes as fast as possible
         //make the window visible
         glfwShowWindow(glfwWindow);
-        glfwMaximizeWindow(glfwWindow); //SO THE SCALE IS SET USING THE CALLBACK
+//        glfwMaximizeWindow(glfwWindow); //SO THE SCALE IS SET USING THE CALLBACK
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
         // LWJGL detects the context that is current in the current thread,
