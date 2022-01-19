@@ -25,6 +25,20 @@ public class Texture {
     public Texture() {
     }
 
+    public String getFilepath() {
+        return filepath;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o == null) return false;
+        if(!(o instanceof Texture)) return false;
+        Texture oTex = (Texture) o;
+        return oTex.getWidth() == this.width && oTex.getHeight() == this.height && oTex.getTextID() == this.textID
+                && oTex.getFilepath().equals(this.getFilepath());
+        //SONO = SE HANNO DIM = E l'ID uguale E lo stesso filePath
+    }
+
     public void init(String filepath){
         this.filepath = filepath;
 
