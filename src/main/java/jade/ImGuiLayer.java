@@ -8,6 +8,7 @@ import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
+import imgui.type.ImBoolean;
 import scenes.Scene;
 
 import java.util.Objects;
@@ -39,6 +40,7 @@ public class ImGuiLayer {
 //        io.setIniFilename(null); // We don't want to save .ini file
         io.setIniFilename("imgui.ini"); // We want to save .ini file
         io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard); // Navigation with keyboard
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable); //enanble docking
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Mouse cursors to display while resizing windows etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
 
@@ -235,14 +237,32 @@ public class ImGuiLayer {
 
         // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
         ImGui.newFrame();
+        //SETUP DOCKING SPACE
+        setupDockSpace();
         currentScene.sceneImgui();
         ImGui.showDemoWindow();
+        ImGui.end(); //end il begin del dockspace iniziato in setupDockSpace()
         ImGui.render();
 
         endFrame();
     }
 
+    private void setupDockSpace() {
+        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking; //parent no docking
+        ImGui.setNextWindowPos(0.0f,0.0f, ImGuiCond.Always); //ogni frame sempre stessa posizione
+        ImGui.setNextWindowSize(Window.getWidth(), Window.getHeight()); //sempre dim della finestra princ
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding,0.f); //no rounded
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f); // no border
+        //SETTING THE PROPS PF THE DOCKED SPACE (framebuffer)
+        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize |
+                ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus // this left it behind
+                | ImGuiWindowFlags.NoNavFocus; // non riprende il focus
+        ImGui.begin("Dockspace Demo", new ImBoolean(true),windowFlags); //creo la docked win
+        ImGui.popStyleVar(2); //tolgo il no rounded e no border che avevo messo
 
+        // Dockspace
+        ImGui.dockSpace(ImGui.getID("Dockspace"));
+    }
 
 
 }
