@@ -10,11 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glDisableVertexAttribArray;
+import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
-public class RenderBatch implements Comparable<RenderBatch>{
+public class RenderBatch implements Comparable<RenderBatch> {
     // Vertex
     // ======
     // Pos               Color                         tex coords     tex id
@@ -31,7 +33,7 @@ public class RenderBatch implements Comparable<RenderBatch>{
     private final int VERTEX_SIZE = 9;
     private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 
-    private SpriteRenderer[] spriteRenderers;
+    private SpriteRenderer[] sprites;
     private int numSprites;
     private boolean hasRoom;
     private float[] vertices;
@@ -41,12 +43,12 @@ public class RenderBatch implements Comparable<RenderBatch>{
     private int vaoID, vboID;
     private int maxBatchSize;
     private Shader shader;
-    private int zIndex; //su quale layer sto
+    private int zIndex;
 
     public RenderBatch(int maxBatchSize, int zIndex) {
         this.zIndex = zIndex;
         shader = AssetPool.getShader("assets/shaders/default.glsl");
-        this.spriteRenderers = new SpriteRenderer[maxBatchSize];
+        this.sprites = new SpriteRenderer[maxBatchSize];
         this.maxBatchSize = maxBatchSize;
 
         // 4 vertices quads
@@ -90,7 +92,7 @@ public class RenderBatch implements Comparable<RenderBatch>{
     public void addSprite(SpriteRenderer spr) {
         // Get index and add renderObject
         int index = this.numSprites;
-        this.spriteRenderers[index] = spr;
+        this.sprites[index] = spr;
         this.numSprites++;
 
         if (spr.getTexture() != null) {
@@ -108,23 +110,20 @@ public class RenderBatch implements Comparable<RenderBatch>{
     }
 
     public void render() {
-        boolean rebufferData = false; //lo metto a true se anche un solo sprite cambia
-        for (int i = 0; i < numSprites; i++) {
-            SpriteRenderer spr = spriteRenderers[i];
-            if(spr.isDirty()){
-                loadVertexProperties(i); //CARICO LE PROPERTIES CAMBIATE
+        boolean rebufferData = false;
+        for (int i=0; i < numSprites; i++) {
+            SpriteRenderer spr = sprites[i];
+            if (spr.isDirty()) {
+                loadVertexProperties(i);
+                spr.setClean();
                 rebufferData = true;
-                spr.setClean(); // LO RESETTO A CLEAN
             }
         }
-
-
-        // For now, we will rebuffer all data every frame
-        //NOW CHANGE ONLY IF ANY SPRITE WAS DIRTY
-        if(rebufferData) {
+        if (rebufferData) {
             glBindBuffer(GL_ARRAY_BUFFER, vboID);
             glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
         }
+
         // Use shader
         shader.use();
         shader.uploadMat4f("uProjection", Window.getScene().camera().getProjectionMatrix());
@@ -146,13 +145,13 @@ public class RenderBatch implements Comparable<RenderBatch>{
         glBindVertexArray(0);
 
         for (int i=0; i < textures.size(); i++) {
-            textures.get(i).unBind();
+            textures.get(i).unbind();
         }
         shader.detach();
     }
 
     private void loadVertexProperties(int index) {
-        SpriteRenderer sprite = this.spriteRenderers[index];
+        SpriteRenderer sprite = this.sprites[index];
 
         // Find offset within array (4 vertices per sprite)
         int offset = index * 4 * VERTEX_SIZE;
@@ -233,21 +232,20 @@ public class RenderBatch implements Comparable<RenderBatch>{
         return this.hasRoom;
     }
 
-    public boolean hasTextureRoom(){
-        return this.textures.size() > 8;
+    public boolean hasTextureRoom() {
+        return this.textures.size() < 8;
     }
 
-    public boolean hasTexture(Texture texture){
-        return this.textures.contains(texture);
+    public boolean hasTexture(Texture tex) {
+        return this.textures.contains(tex);
     }
 
-    public int getzIndex() {
-        return zIndex;
+    public int zIndex() {
+        return this.zIndex;
     }
-
 
     @Override
     public int compareTo(RenderBatch o) {
-        return Integer.compare(this.zIndex, o.zIndex);
+        return Integer.compare(this.zIndex, o.zIndex());
     }
 }

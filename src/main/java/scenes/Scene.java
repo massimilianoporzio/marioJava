@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import components.Component;
 import components.ComponentDeserializer;
-import components.ComponentSerializer;
 import imgui.ImGui;
 import jade.Camera;
 import jade.GameObject;
@@ -76,7 +75,7 @@ public abstract class Scene {
     public void saveExit() {
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
-                .registerTypeAdapter(Component.class, new ComponentSerializer())
+                .registerTypeAdapter(Component.class, new ComponentDeserializer())
                 .registerTypeAdapter(GameObject.class, new GameObjectDeserializer())
                 .create();
 
@@ -104,25 +103,24 @@ public abstract class Scene {
         }
 
         if (!inFile.equals("")) {
-            int maxGoId = -1; //CARICO DA FILE
+            int maxGoId = -1;
             int maxCompId = -1;
             GameObject[] objs = gson.fromJson(inFile, GameObject[].class);
             for (int i=0; i < objs.length; i++) {
                 addGameObjectToScene(objs[i]);
-                //MODIFICA GLI ID:
-                for (Component c :
-                        objs[i].getAllComponents()) {
+
+                for (Component c : objs[i].getAllComponents()) {
                     if (c.getUid() > maxCompId) {
-                        maxCompId = c.getUid(); //SE CARICANDO DA FILE TROVO ID > maxCompId aggiorno
-                     }
+                        maxCompId = c.getUid();
                     }
-                if(objs[i].getUid() > maxGoId){
-                    maxGoId = objs[i].getUid(); //SE CARICANDO DA FILE TROVO ID > maxGoId aggiorno
                 }
-                
+                if (objs[i].getUid() > maxGoId) {
+                    maxGoId = objs[i].getUid();
+                }
             }
+
+            maxGoId++;
             maxCompId++;
-            maxGoId++; //CARICO PER I PROSSIMI
             GameObject.init(maxGoId);
             Component.init(maxCompId);
             this.levelLoaded = true;

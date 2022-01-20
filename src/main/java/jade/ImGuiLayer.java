@@ -1,21 +1,20 @@
 package jade;
 
-import imgui.ImFontAtlas;
-import imgui.ImFontConfig;
-import imgui.ImGui;
-import imgui.ImGuiIO;
+import editor.GameViewWindow;
+import imgui.*;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
 import imgui.flag.*;
+
+
 import imgui.gl3.ImGuiImplGl3;
 import imgui.type.ImBoolean;
 import scenes.Scene;
 
-import java.util.Objects;
-
 import static org.lwjgl.glfw.GLFW.*;
 
 public class ImGuiLayer {
+
     private long glfwWindow;
 
     // Mouse cursors provided by GLFW
@@ -33,14 +32,14 @@ public class ImGuiLayer {
         // IMPORTANT!!
         // This line is critical for Dear ImGui to work.
         ImGui.createContext();
+
         // ------------------------------------------------------------
         // Initialize ImGuiIO config
         final ImGuiIO io = ImGui.getIO();
 
-//        io.setIniFilename(null); // We don't want to save .ini file
-        io.setIniFilename("imgui.ini"); // We want to save .ini file
+        io.setIniFilename("imgui.ini"); // We don't want to save .ini file
         io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard); // Navigation with keyboard
-        io.setConfigFlags(ImGuiConfigFlags.DockingEnable); //enanble docking
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Mouse cursors to display while resizing windows etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
 
@@ -98,9 +97,8 @@ public class ImGuiLayer {
             io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
             io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
 
-            if(!io.getWantCaptureKeyboard()){
-                //PASSO LA CHIAMATA AL MIO KEYLISTNER
-                KeyListener.keyCallback(w,key,scancode,action,mods);
+            if (!io.getWantCaptureKeyboard()) {
+                KeyListener.keyCallback(w, key, scancode, action, mods);
             }
         });
 
@@ -124,9 +122,9 @@ public class ImGuiLayer {
             if (!io.getWantCaptureMouse() && mouseDown[1]) {
                 ImGui.setWindowFocus(null);
             }
-            //SE IMGUI NON USA IL MOUSE PASSO AL MIO MOUSELISTENER
-            if(!io.getWantCaptureMouse()){
-                MouseListener.mouseButtonCallback(glfwWindow,button,action,mods);
+
+            if (!io.getWantCaptureMouse()) {
+                MouseListener.mouseButtonCallback(w, button, action, mods);
             }
         });
 
@@ -146,49 +144,32 @@ public class ImGuiLayer {
             @Override
             public String get() {
                 final String clipboardString = glfwGetClipboardString(glfwWindow);
-                return Objects.requireNonNullElse(clipboardString, "");
+                if (clipboardString != null) {
+                    return clipboardString;
+                } else {
+                    return "";
+                }
             }
         });
+
         // ------------------------------------------------------------
         // Fonts configuration
         // Read: https://raw.githubusercontent.com/ocornut/imgui/master/docs/FONTS.txt
 
-        // a b c d 1 2 ! &
         final ImFontAtlas fontAtlas = io.getFonts();
         final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
-//
+
         // Glyphs could be added per-font as well as per config used globally like here
-//        fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
         fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesDefault());
-//        // Add a default font, which is 'ProggyClean.ttf, 13px'
-//        fontAtlas.addFontDefault();
-//
+
         // Fonts merge example
-//        fontConfig.setMergeMode(true); // When enabled, all fonts added with this config would be merged with the previously added font
         fontConfig.setPixelSnapH(true);
-
         fontAtlas.addFontFromFileTTF("assets/fonts/segoeui.ttf", 16, fontConfig);
-//        fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-
-//        fontConfig.setMergeMode(false);
-//        fontConfig.setPixelSnapH(false);
-
-        // Fonts from file/memory example
-        // We can add new fonts from the file system
-//        fontAtlas.addFontFromFileTTF("src/test/resources/Righteous-Regular.ttf", 14, fontConfig);
-//        fontAtlas.addFontFromFileTTF("src/test/resources/Righteous-Regular.ttf", 16, fontConfig);
-
-        // Or directly from the memory
-//        fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
-//        fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 14, fontConfig);
-//        fontConfig.setName("Roboto-Regular.ttf, 16px"); // We can apply a new config value every time we add a new font
-//        fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 16, fontConfig);
 
         fontConfig.destroy(); // After all fonts were added we don't need this config more
 
         // ------------------------------------------------------------
         // Use freetype instead of stb_truetype to build a fonts texture
-//        ImGuiFreeType.buildFontAtlas(fontAtlas, ImGuiFreeType.RasterizerFlags.LightHinting);
         fontAtlas.setFlags(ImGuiFreeTypeBuilderFlags.LightHinting);
         fontAtlas.build();
 
@@ -196,6 +177,21 @@ public class ImGuiLayer {
         // This method SHOULD be called after you've initialized your ImGui configuration (fonts and so on).
         // ImGui context should be created as well.
         imGuiGl3.init("#version 330 core");
+    }
+
+    public void update(float dt, Scene currentScene) {
+        startFrame(dt);
+
+        // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
+        ImGui.newFrame();
+        setupDockspace();
+        currentScene.sceneImgui();
+        ImGui.showDemoWindow();
+        GameViewWindow.imgui();
+        ImGui.end();
+        ImGui.render();
+
+        endFrame();
     }
 
     private void startFrame(final float deltaTime) {
@@ -223,7 +219,6 @@ public class ImGuiLayer {
         // After Dear ImGui prepared a draw data, we use it in the LWJGL3 renderer.
         // At that moment ImGui will be rendered to the current OpenGL context.
         imGuiGl3.renderDrawData(ImGui.getDrawData());
-
     }
 
     // If you want to clean a room after yourself - do it by yourself
@@ -232,37 +227,21 @@ public class ImGuiLayer {
         ImGui.destroyContext();
     }
 
-    public void update(float dt, Scene currentScene) {
-        startFrame(dt);
+    private void setupDockspace() {
+        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
 
-        // Any Dear ImGui code SHOULD go between ImGui.newFrame()/ImGui.render() methods
-        ImGui.newFrame();
-        //SETUP DOCKING SPACE
-        setupDockSpace();
-        currentScene.sceneImgui();
-        ImGui.showDemoWindow();
-        ImGui.end(); //end il begin del dockspace iniziato in setupDockSpace()
-        ImGui.render();
+        ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
+        ImGui.setNextWindowSize(Window.getWidth(), Window.getHeight());
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
+        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse |
+                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove |
+                ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
 
-        endFrame();
-    }
-
-    private void setupDockSpace() {
-        int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking; //parent no docking
-        ImGui.setNextWindowPos(0.0f,0.0f, ImGuiCond.Always); //ogni frame sempre stessa posizione
-        ImGui.setNextWindowSize(Window.getWidth(), Window.getHeight()); //sempre dim della finestra princ
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding,0.f); //no rounded
-        ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f); // no border
-        //SETTING THE PROPS PF THE DOCKED SPACE (framebuffer)
-        windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize |
-                ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus // this left it behind
-                | ImGuiWindowFlags.NoNavFocus; // non riprende il focus
-        ImGui.begin("Dockspace Demo", new ImBoolean(true),windowFlags); //creo la docked win
-        ImGui.popStyleVar(2); //tolgo il no rounded e no border che avevo messo
+        ImGui.begin("Dockspace Demo", new ImBoolean(true), windowFlags);
+        ImGui.popStyleVar(2);
 
         // Dockspace
         ImGui.dockSpace(ImGui.getID("Dockspace"));
     }
-
-
 }
