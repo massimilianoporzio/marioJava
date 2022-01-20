@@ -39,8 +39,6 @@ public class LevelEditorScene extends Scene {
             if(gameObjects.size()>0){
                 this.activeGameObject = gameObjects.get(0);
             }
-
-
             return;
         }
 
@@ -74,6 +72,18 @@ public class LevelEditorScene extends Scene {
                 new Spritesheet(AssetPool.getTexture("assets/images/spritesheets/decorationsAndBlocks.png"),
                         16,16, 81,0));
         AssetPool.getTexture("assets/images/blendImage2.png");
+
+        for (GameObject go :gameObjects) {
+             if(go.getComponent(SpriteRenderer.class) != null){
+                 //SE IL GO HA UNO SPRITE RENDERER
+                 SpriteRenderer spr = go.getComponent(SpriteRenderer.class);
+                 //SE c'è una texture:
+                 if(spr.getTexture() != null){
+                     spr.setTexture(AssetPool.getTexture(spr.getTexture().getFilepath()));
+                     //override from the AssetPool the texture
+                 }
+             }
+        }
     }
 
     private int spriteIndex = 0;
@@ -136,9 +146,9 @@ public class LevelEditorScene extends Scene {
     public void update(float dt) {
 
         levelEditorStuff.update(dt);
-        DebugDraw.addCircle(new Vector2f(x,y),64,new Vector3f(0,1,0),1);
-        x += 50f*dt;
-        y += 50*dt;
+//        DebugDraw.addCircle(new Vector2f(x,y),64,new Vector3f(0,1,0),1);
+//        x += 50f*dt;
+//        y += 50*dt;
         for (GameObject go : this.gameObjects) {
             go.update(dt);
         }
