@@ -9,11 +9,14 @@ import org.joml.Vector2f;
 
 public class GameViewWindow {
 
+    private static float leftX, rightX, topY, bottomY; //COORD DELK VIEWPORT
+
     public static void imgui() {
         ImGui.begin("Game Viewport", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 
         ImVec2 windowSize = getLargestSizeForViewport();
         ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
+
 
         ImGui.setCursorPos(windowPos.x, windowPos.y);
 
@@ -21,6 +24,11 @@ public class GameViewWindow {
         ImGui.getCursorScreenPos(topLeft);
         topLeft.x -= ImGui.getScrollX();
         topLeft.y -= ImGui.getScrollY();
+        leftX = topLeft.x;
+        bottomY = topLeft.y;
+        rightX = leftX + windowSize.x;
+        topY = topLeft.y + windowSize.y;
+
 
         int textureId = Window.getFramebuffer().getTextureId();
         ImGui.image(textureId, windowSize.x, windowSize.y, 0, 1, 1, 0);
@@ -28,6 +36,13 @@ public class GameViewWindow {
         MouseListener.setGameViewportSize(new Vector2f(windowSize.x,windowSize.y));
 
         ImGui.end();
+    }
+
+    public static boolean getWantCaptureMouse() {
+        //SERVE A DIRE IN CHE ZONA DELLA FINESTRA PRINCIPALE VOGLIAMO AVERE LA POSS DI PRENDERE LE COORD DEL MOUSE
+        //A NOI INTERESSA SOLO IL GAMEVIEWPORT
+        return (MouseListener.getX() >= leftX && MouseListener.getX() <= rightX
+                && MouseListener.getY() >=bottomY && MouseListener.getY() <= topY);
     }
 
     private static ImVec2 getLargestSizeForViewport() {
