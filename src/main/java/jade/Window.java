@@ -3,11 +3,11 @@ package jade;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
-import renderer.DebugDraw;
-import renderer.Framebuffer;
+import renderer.*;
 import scenes.LevelEditorScene;
 import scenes.LevelScene;
 import scenes.Scene;
+import util.AssetPool;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,6 +20,9 @@ public class Window {
     private long glfwWindow;
     private ImGuiLayer imguiLayer;
     private Framebuffer framebuffer;
+
+    //for storing id of objects inside the GameView
+    private PickingTexture pickingTexture;
 
     public float r, g, b, a;
     private boolean fadeToBlack = false;
@@ -134,20 +137,51 @@ public class Window {
         this.imguiLayer.initImGui();
 
         this.framebuffer = new Framebuffer(3840, 2160);
+        //ORA LA PICKING TEXTURE CHE è 1:1 pixel by pixel col gameview
+        this.pickingTexture = new PickingTexture(3840, 2160); //STESSA DIM DEL FRAMEBUFFER
         glViewport(0, 0, 3840, 2160);
 
-        Window.changeScene(0);
+        Window.changeScene(0); //VAI ALLA PRIMA SCENA
     }
 
     public void loop() {
         float beginTime = (float)glfwGetTime();
         float endTime;
         float dt = -1.0f;
+        //BEFORE THE LOOP SET THE SHADER
+        Shader defaultShader = AssetPool.getShader("assets/shaders/default.glsl");
+        Shader pickingShader = AssetPool.getShader("assets/shaders/picking.glsl");
 
         while (!glfwWindowShouldClose(glfwWindow)) {
             // Poll events
             glfwPollEvents();
 
+            //RENDER PASS 1: Render picking texture
+            glDisable(GL_BLEND); //pure pixel data no blending
+            pickingTexture.enableWriting();
+
+            glViewport(0,0,3840, 2160); //sempre stesse dim // DRAW ALL THE TEXTIRE
+            glClearColor(0.f,0.f,0.f, 0.f); //SET IL COLORE PER FARE CLEAR (tutto a 0)
+            //faccio clear
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            //bind the shader
+            Renderer.bindShader(pickingShader); //CUSTOM SHADER PER ASSEGNARE GLI ID DEGLI OGGETTI ALLA TEXTURE
+            currentScene.render();
+
+            if(MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)){
+                int x = (int)MouseListener.getScreenX();
+                int y = (int)MouseListener.getScreenY(); //SCREEN COORDS!
+                System.out.println("X: "+x+" Y: "+ y+" GAME OBJECT ID: "+pickingTexture.readPixel(x,y));
+            }
+
+            pickingTexture.disableWriting();
+
+            //RE ENABLE BLENDING FOR THE GAME
+            glEnable(GL_BLEND);
+
+
+            //RENDER PASS 2: Render actual game
             DebugDraw.beginFrame();
 
             this.framebuffer.bind();
@@ -156,7 +190,9 @@ public class Window {
 
             if (dt >= 0) {
                 DebugDraw.draw();
+                Renderer.bindShader(defaultShader);//SHADER DEFAULT
                 currentScene.update(dt);
+                currentScene.render(); // ora la parte di rendering è nel metodo render
             }
             this.framebuffer.unbind();
 

@@ -11,6 +11,7 @@ import java.util.List;
 public class Renderer {
     private final int MAX_BATCH_SIZE = 1000;
     private List<RenderBatch> batches;
+    private static Shader currentShader; //GLOABL OBJECT
 
     public Renderer() {
         this.batches = new ArrayList<>();
@@ -21,6 +22,10 @@ public class Renderer {
         if (spr != null) {
             add(spr);
         }
+    }
+
+    public static void bindShader(Shader shader){
+        currentShader = shader;
     }
 
     private void add(SpriteRenderer sprite) {
@@ -45,7 +50,12 @@ public class Renderer {
         }
     }
 
+    public static Shader getBoundShader(){
+        return currentShader;
+    }
+
     public void render() {
+        currentShader.use(); //abilito l'uso
         for (RenderBatch batch : batches) {
             batch.render();
         }

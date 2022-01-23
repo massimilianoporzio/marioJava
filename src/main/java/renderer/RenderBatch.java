@@ -25,13 +25,16 @@ public class RenderBatch implements Comparable<RenderBatch> {
     private final int COLOR_SIZE = 4;
     private final int TEX_COORDS_SIZE = 2;
     private final int TEX_ID_SIZE = 1;
+    private final int ENTITY_ID_SIZE = 1;
 
     private final int POS_OFFSET = 0;
     private final int COLOR_OFFSET = POS_OFFSET + POS_SIZE * Float.BYTES;
     private final int TEX_COORDS_OFFSET = COLOR_OFFSET + COLOR_SIZE * Float.BYTES;
     private final int TEX_ID_OFFSET = TEX_COORDS_OFFSET + TEX_COORDS_SIZE * Float.BYTES;
-    private final int VERTEX_SIZE = 9;
+    private final int ENTITY_ID_OFFSET = TEX_ID_OFFSET + ENTITY_ID_SIZE * Float.BYTES;
+    private final int VERTEX_SIZE = 10; //10 perché c'è anche l'id del gameobject
     private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
+
 
     private SpriteRenderer[] sprites;
     private int numSprites;
@@ -42,12 +45,13 @@ public class RenderBatch implements Comparable<RenderBatch> {
     private List<Texture> textures;
     private int vaoID, vboID;
     private int maxBatchSize;
-    private Shader shader;
+//    private Shader shader; NON LO USO PIU METTO RIFERIM A SHADER AD OGNI Renderer
     private int zIndex;
 
     public RenderBatch(int maxBatchSize, int zIndex) {
         this.zIndex = zIndex;
-        shader = AssetPool.getShader("assets/shaders/default.glsl");
+//        shader = AssetPool.getShader("assets/shaders/default.glsl"); // NON LO USO PIU
+
         this.sprites = new SpriteRenderer[maxBatchSize];
         this.maxBatchSize = maxBatchSize;
 
@@ -87,6 +91,10 @@ public class RenderBatch implements Comparable<RenderBatch> {
 
         glVertexAttribPointer(3, TEX_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, TEX_ID_OFFSET);
         glEnableVertexAttribArray(3);
+
+        //ENABLE TEX ID ATTRIB
+        glVertexAttribPointer(4, ENTITY_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, ENTITY_ID_OFFSET);
+        glEnableVertexAttribArray(4);
     }
 
     public void addSprite(SpriteRenderer spr) {
@@ -125,6 +133,7 @@ public class RenderBatch implements Comparable<RenderBatch> {
         }
 
         // Use shader
+        Shader shader = Renderer.getBoundShader();
         shader.use();
         shader.uploadMat4f("uProjection", Window.getScene().camera().getProjectionMatrix());
         shader.uploadMat4f("uView", Window.getScene().camera().getViewMatrix());
@@ -197,6 +206,9 @@ public class RenderBatch implements Comparable<RenderBatch> {
 
             // Load texture id
             vertices[offset + 8] = texId;
+
+            // Load entity Id
+            vertices[offset + 9] = sprite.gameObject.getUid();
 
             offset += VERTEX_SIZE;
         }
